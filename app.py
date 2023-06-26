@@ -13,7 +13,7 @@ from models.common import UploadResult, SegmentResult
 app = Flask(__name__)
 
 STATIC_URL = "http://39.100.68.34:8000" + "/static"
-STATIC_PATH = "/static"
+STATIC_PATH = ":qqqstatic"
 SEGMENT_PATH = os.path.join(STATIC_PATH, 'segments')
 
 # 加载模型
