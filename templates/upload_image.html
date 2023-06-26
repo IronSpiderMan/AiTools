@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图片上传示例</title>
+</head>
+<body>
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="fileInput">
+    <input type="submit" value="上传">
+</form>
+<script type="text/javascript" src="/static/plugins/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#uploadForm').submit(function (event) {
+            event.preventDefault(); // 阻止表单提交
+
+            var fileInput = $('#fileInput')[0];
+            var file = fileInput.files[0]; // 获取用户选择的文件
+
+            var formData = new FormData();
+            formData.append('file', file); // 将文件添加到FormData对象
+            $.ajax({
+                {#url: '39.100.68.34:5000',#}
+                url: '/api/upload_image',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.onprogress = function (event) {
+                        if (event.lengthComputable) {
+                            var percentComplete = (event.loaded / event.total) * 100;
+                            console.log('上传进度：' + percentComplete + '%');
+                        }
+                    };
+                    return xhr;
+                },
+                success: function (response) {
+                    console.log('上传成功');
+                },
+                error: function () {
+                    console.log('上传失败');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
