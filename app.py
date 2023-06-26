@@ -12,8 +12,10 @@ from models.common import UploadResult, SegmentResult
 
 app = Flask(__name__)
 
-STATIC_URL = "http://39.100.68.34:8000" + "/static"
+HOST = "http://39.100.68.34:8000"
+STATIC_URL = HOST + "/static"
 STATIC_PATH = "./static"
+SEGMENT_URL = HOST + "/static/segments"
 SEGMENT_PATH = os.path.join(STATIC_PATH, 'segments')
 
 # 加载模型
@@ -62,7 +64,7 @@ def segment():
             save_name = "segment_" + f.filename.split(".")[0] + ".png"
             save_path = os.path.join(SEGMENT_PATH, save_name)
             Image.fromarray(segmented).save(save_path)
-        result = SegmentResult('success', '抠图成功', os.path.join(STATIC_URL, save_name))
+        result = SegmentResult('success', '抠图成功', os.path.join(SEGMENT_URL, save_name))
         return json.dumps(result)
 
 
