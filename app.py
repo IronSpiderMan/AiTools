@@ -2,7 +2,7 @@ import json
 import os
 import cv2
 import torch
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from gevent import pywsgi
 from PIL import Image
 from torchvision import transforms
@@ -44,13 +44,11 @@ def upload_image():
 def segment():
     if request.method != 'POST':
         result = SegmentResult('failed', '不支持的请求方式', None)
-        return json.dumps(result)
+        return jsonify(json.dumps(result))
     else:
         # 获取上传的图片
         f = request.files['file']
         fpath = os.path.join(SEGMENT_PATH, f.filename)
-        print("======================================")
-        print(fpath)
         f.save(fpath)
         # 读取图片，转换成Tensor
         src = Image.open(fpath)
@@ -65,7 +63,7 @@ def segment():
             save_path = os.path.join(SEGMENT_PATH, save_name)
             Image.fromarray(segmented).save(save_path)
         result = SegmentResult('success', '抠图成功', os.path.join(SEGMENT_URL, save_name))
-        return json.dumps(result)
+        return jsonify(json.dumps(result))
 
 
 if __name__ == '__main__':
