@@ -47,6 +47,7 @@ def segment():
         # 获取上传的图片
         f = request.files['file']
         fpath = os.path.join(SEGMENT_PATH, f.filename)
+        print(os.path.abspath("."))
         f.save(fpath)
         # 读取图片，转换成Tensor
         src = Image.open(fpath)
