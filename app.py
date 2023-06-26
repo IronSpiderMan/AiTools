@@ -13,7 +13,7 @@ from models.common import UploadResult, SegmentResult
 app = Flask(__name__)
 
 STATIC_URL = "http://39.100.68.34:8000" + "/static"
-STATIC_PATH = ":static"
+STATIC_PATH = "./static"
 SEGMENT_PATH = os.path.join(STATIC_PATH, 'segments')
 
 # 加载模型
@@ -47,7 +47,6 @@ def segment():
         # 获取上传的图片
         f = request.files['file']
         fpath = os.path.join(SEGMENT_PATH, f.filename)
-        print(os.path.abspath("."))
         f.save(fpath)
         # 读取图片，转换成Tensor
         src = Image.open(fpath)
