@@ -7,8 +7,8 @@ from gevent import pywsgi
 from PIL import Image
 from torchvision import transforms
 from hubs.model import MattingNetwork
-
 from models.common import UploadResult, SegmentResult
+from utils import namedtuple2json
 
 app = Flask(__name__)
 
@@ -25,7 +25,8 @@ segmentor.load_state_dict(torch.load('static/models/rvm_mobilenetv3.pth'))
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    result = UploadResult('success', '上传成功', STATIC_PATH)
+    return jsonify(namedtuple2json(result))
 
 
 @app.route('/api/upload_image', methods=['POST'])
@@ -37,14 +38,14 @@ def upload_image():
         f = request.files['file']
         f.save(os.path.join('static', 'segments', f.filename))
         result = UploadResult('success', '上传成功', STATIC_PATH + "/" + f.filename)
-        return json.dumps(result)
+        return jsonify(namedtuple2json(result))
 
 
 @app.route('/api/segment', methods=['POST'])
 def segment():
     if request.method != 'POST':
         result = SegmentResult('failed', '不支持的请求方式', None)
-        return jsonify(json.dumps(result))
+        return jsonify(namedtuple2json(result))
     else:
         # 获取上传的图片
         f = request.files['file']
@@ -63,7 +64,7 @@ def segment():
             save_path = os.path.join(SEGMENT_PATH, save_name)
             Image.fromarray(segmented).save(save_path)
         result = SegmentResult('success', '抠图成功', os.path.join(SEGMENT_URL, save_name))
-        return jsonify(json.dumps(result))
+        return jsonify(namedtuple2json(result))
 
 
 if __name__ == '__main__':
