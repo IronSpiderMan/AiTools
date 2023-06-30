@@ -1,4 +1,3 @@
-import json
 import os
 import cv2
 import torch
@@ -8,7 +7,7 @@ from PIL import Image
 from torchvision import transforms
 from hubs.model import MattingNetwork
 from models.common import UploadResult, SegmentResult
-from utils import namedtuple2json
+from utils import namedtuple2json, center_crop
 
 app = Flask(__name__)
 
@@ -26,7 +25,6 @@ segmentor.load_state_dict(torch.load('static/models/rvm_mobilenetv3.pth'))
 @app.route('/')
 def hello_world():
     result = UploadResult('success', '上传成功', STATIC_PATH)
-    # return jsonify(namedtuple2json(result))
     return namedtuple2json(result)
 
 
@@ -54,6 +52,7 @@ def segment():
         f.save(fpath)
         # 读取图片，转换成Tensor
         src = Image.open(fpath)
+        src = center_crop(src)
         src = (transforms.PILToTensor()(src) / 255.)[None]
         # 抠图
         with torch.no_grad():
