@@ -13,7 +13,7 @@ from utils import steganography as ste, anti_steganography as anti_ste
 app = Flask(__name__)
 
 HOST = "http://39.100.68.34:8000"
-STATIC_PATH = "/static"
+STATIC_PATH = "./static"
 SEGMENT_PATH = os.path.join(STATIC_PATH, 'segments')
 SEGMENT_URL = HOST + "/static/segments"
 STEGANOGRAPHY_ORIGIN_PATH = os.path.join(STATIC_PATH, 'steganography', 'origin')
