@@ -1,9 +1,48 @@
+import cv2
 import hashlib
+import qrcode
+import numpy as np
 from PIL import ImageOps, Image
 
 from settings import RESOLUTION
 
 SALT = "Zack Fair"
+
+
+def steganography(image, content, save_path):
+    """
+    图像隐写，把content生成二维码，写入image，保存到save_path
+    :param image: 原图的numpy数组
+    :param content: 要隐写的内容，即二维码扫出的内容
+    :param save_path: 保存路径 /static/steganography/ste 下
+    :return: 如果成功，返回save_path，否则返回None
+    """
+    try:
+        b, g, r = cv2.split(image)
+        h, w = b.shape
+        qr = qrcode.make(content)
+        qr = np.array(qr, dtype=np.uint8)
+        layer0 = cv2.bitwise_and(image, 1)
+        layer0 = cv2.resize(layer0, (w, h))
+        b = b - layer0 + qr
+        image = cv2.merge((b, g, r))
+        cv2.imwrite(save_path, image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+        return save_path
+    except Exception as e:
+        return None
+
+
+def anti_steganography(image, qr_path):
+    """
+    反隐写
+    :param image: 带有隐写信息的图片numpy数组
+    :param qr_path: 解析出来的隐写二维码保存路径，在 /static/steganography/qrcode 下
+    :return:
+    """
+    b, g, r = cv2.split(image)
+    layer0 = cv2.bitwise_and(b, 1)
+    layer0[layer0 == 1] = 255
+    cv2.imwrite(layer0, qr_path)
 
 
 def str2md5(dirname):

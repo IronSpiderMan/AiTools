@@ -5,3 +5,5 @@ from collections import namedtuple
 """
 UploadResult = namedtuple('UploadResult', ['status', 'msg', 'url'])
 SegmentResult = UploadResult
+DownloadResult = UploadResult
+SteganographyResult = UploadResult
