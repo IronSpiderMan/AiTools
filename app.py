@@ -56,7 +56,7 @@ def download_image():
         pass
 
 
-@app.route('/api/steganography', method=['POST'])
+@app.route('/api/steganography', methods=['POST'])
 def steganography():
     if request.method != 'POST':
         result = SteganographyResult('failed', '不支持的请求方式', None)
