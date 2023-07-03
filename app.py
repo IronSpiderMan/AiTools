@@ -99,7 +99,7 @@ def segment():
             save_name = "segment_" + f.filename.split(".")[0] + ".png"
             save_path = os.path.join(SEGMENT_PATH, save_name)
             Image.fromarray(segmented).save(save_path)
-        result = SegmentResult('success', '抠图成功', os.path.join(HOST + SEGMENT_PATH, save_name))
+        result = SegmentResult('success', '抠图成功', SEGMENT_URL + "/" + save_name)
         return namedtuple2json(result)
 
 
