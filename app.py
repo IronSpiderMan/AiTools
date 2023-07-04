@@ -3,6 +3,7 @@ import cv2
 import torch
 from flask import Flask, request, render_template
 from gevent import pywsgi
+from urllib.parse import urlparse
 from PIL import Image
 from torchvision import transforms
 from hubs.model import MattingNetwork
@@ -12,8 +13,12 @@ from utils import steganography as ste, anti_steganography as anti_ste
 
 app = Flask(__name__)
 
-HOST = "http://39.100.68.34:8000"
+# HOST = "http://39.100.68.34:8000"
+HOST = "http://127.0.0.1:8000"
 STATIC_PATH = "./static"
+STATIC_URL = HOST + "/static"
+IMAGES_PATH = os.path.join(STATIC_PATH, 'images')
+IMAGES_URL = HOST + "/static/images"
 SEGMENT_PATH = os.path.join(STATIC_PATH, 'segments')
 SEGMENT_URL = HOST + "/static/segments"
 STEGANOGRAPHY_ORIGIN_PATH = os.path.join(STATIC_PATH, 'steganography', 'origin')
@@ -42,8 +47,9 @@ def upload_image():
         return render_template('upload_image.html')
     elif request.method == 'POST':
         f = request.files['file']
-        f.save(os.path.join('static', 'segments', f.filename))
-        result = UploadResult('success', '上传成功', STATIC_PATH + "/" + f.filename)
+        fpath = os.path.join(IMAGES_PATH, f.filename)
+        f.save(fpath)
+        result = UploadResult('success', '上传成功', IMAGES_URL + "/" + f.filename)
         return namedtuple2json(result)
 
 
@@ -56,23 +62,41 @@ def download_image():
         pass
 
 
-@app.route('/api/steganography', methods=['POST'])
+@app.route('/api/steganography', methods=['GET', 'POST'])
 def steganography():
     if request.method != 'POST':
         result = SteganographyResult('failed', '不支持的请求方式', None)
         return namedtuple2json(result)
     else:
-        # 获取上传的图片
-        f = request.files['file']
-        fpath = os.path.join(STEGANOGRAPHY_ORIGIN_PATH, f.filename)
-        f.save(fpath)
-        # 读取图片开始隐写
-        image = cv2.imread(fpath)
-        ste_save_path = os.path.join(STEGANOGRAPHY_STE_PATH, f.filename)
-        if not ste(image, '', ste_save_path):
+        image_url = request.values.get('image_url')
+        content = request.values.get('content')
+        path = urlparse(image_url).path
+        image = cv2.imread("." + path)
+        filename = os.path.basename(image_url)
+        ste_save_path = os.path.join(STEGANOGRAPHY_STE_PATH, filename)
+        if not ste(image, content, ste_save_path):
             result = SteganographyResult('failed', '隐写失败', None)
         else:
-            result = SteganographyResult('success', '隐写成功', STEGANOGRAPHY_STE_URL + "/" + f.filename)
+            result = SteganographyResult('success', '隐写成功', STEGANOGRAPHY_STE_URL + "/" + filename)
+        return namedtuple2json(result)
+
+
+@app.route('/api/anti_steganography', methods=['POST'])
+def anti_steganography():
+    if request.method != 'POST':
+        result = SteganographyResult('failed', '不支持的请求方式', None)
+        return namedtuple2json(result)
+    else:
+        # 获取上传的图片
+        image_url = request.values.get('image_url')
+        path = urlparse(image_url).path
+        image = cv2.imread("." + path)
+        filename = os.path.basename(image_url)
+        filename = filename.replace(filename.split(".")[-1], 'png')
+        # 读取图片开始解隐写
+        qr_save_path = os.path.join(STEGANOGRAPHY_QRCODE_PATH, filename)
+        anti_ste(image, qr_save_path)
+        result = SteganographyResult('success', '解析成功', STEGANOGRAPHY_QRCODE_URL + "/" + filename)
         return namedtuple2json(result)
 
 

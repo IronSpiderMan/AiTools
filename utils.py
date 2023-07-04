@@ -1,12 +1,19 @@
+import traceback
+
 import cv2
 import hashlib
 import qrcode
+from urllib.parse import urlparse
 import numpy as np
 from PIL import ImageOps, Image
 
 from settings import RESOLUTION
 
 SALT = "Zack Fair"
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+}
 
 
 def steganography(image, content, save_path):
@@ -22,13 +29,15 @@ def steganography(image, content, save_path):
         h, w = b.shape
         qr = qrcode.make(content)
         qr = np.array(qr, dtype=np.uint8)
-        layer0 = cv2.bitwise_and(image, 1)
+        qr = cv2.resize(qr, (w, h))
+        layer0 = cv2.bitwise_and(b, 1)
         layer0 = cv2.resize(layer0, (w, h))
         b = b - layer0 + qr
         image = cv2.merge((b, g, r))
         cv2.imwrite(save_path, image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
         return save_path
     except Exception as e:
+        traceback.print_exc()
         return None
 
 
@@ -42,7 +51,8 @@ def anti_steganography(image, qr_path):
     b, g, r = cv2.split(image)
     layer0 = cv2.bitwise_and(b, 1)
     layer0[layer0 == 1] = 255
-    cv2.imwrite(layer0, qr_path)
+    print(type(qr_path), qr_path)
+    cv2.imwrite(qr_path, layer0)
 
 
 def str2md5(dirname):
