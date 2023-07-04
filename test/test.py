@@ -1,9 +1,12 @@
 import json
 
 import cv2
+import numpy as np
 import torch
 from PIL import Image
+import qrcode
 from collections import namedtuple
+from utils import steganography, anti_steganography
 from torchvision import transforms
 from hubs.model import MattingNetwork
 
@@ -22,26 +25,12 @@ def segment_test():
         Image.fromarray(segmented).show()
 
 
-def namedtuple2json(nt):
-    nt_json = {}
-    for field in nt._fields:
-        attr = getattr(nt, field)
-        if isinstance(attr, (int, str, float)):
-            nt_json[field] = attr
-        else:
-            nt_json[field] = None
-    return nt_json
-
-
-class Test:
-    def __init__(self):
-        self.a = 1
-        self.b = 2
+def steganography_test():
+    image = cv2.imread('../static/images/7wywvVpYo8jYd3f3eeb9f62ffc709c51555384af8bf3.jpg')
+    steganography(image, '111', '111.png')
+    image = cv2.imread('111.png', cv2.IMREAD_UNCHANGED)
+    anti_steganography(image, 'qr.png')
 
 
 if __name__ == '__main__':
-    t = Test()
-    # namedtuple2json()
-    # Result = namedtuple('Result', ['f1', 'f2'])
-    # r1 = Result(1, 2)
-    # print(getattr(r1, 'f1'))
+    steganography_test()

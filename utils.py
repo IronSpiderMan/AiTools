@@ -3,7 +3,6 @@ import traceback
 import cv2
 import hashlib
 import qrcode
-from urllib.parse import urlparse
 import numpy as np
 from PIL import ImageOps, Image
 
@@ -25,15 +24,16 @@ def steganography(image, content, save_path):
     :return: 如果成功，返回save_path，否则返回None
     """
     try:
-        b, g, r = cv2.split(image)
-        h, w = b.shape
+        h, w, _ = image.shape
         qr = qrcode.make(content)
         qr = np.array(qr, dtype=np.uint8)
         qr = cv2.resize(qr, (w, h))
-        layer0 = cv2.bitwise_and(b, 1)
-        layer0 = cv2.resize(layer0, (w, h))
-        b = b - layer0 + qr
-        image = cv2.merge((b, g, r))
+        qr = np.expand_dims(qr, 2).repeat(3, axis=2)
+        layer0 = cv2.bitwise_and(image, 1)
+        image = cv2.add(
+            cv2.subtract(image, layer0),
+            qr
+        )
         cv2.imwrite(save_path, image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
         return save_path
     except Exception as e:
@@ -48,10 +48,8 @@ def anti_steganography(image, qr_path):
     :param qr_path: 解析出来的隐写二维码保存路径，在 /static/steganography/qrcode 下
     :return:
     """
-    b, g, r = cv2.split(image)
-    layer0 = cv2.bitwise_and(b, 1)
+    layer0 = cv2.bitwise_and(image, 1)[:, :, 0]
     layer0[layer0 == 1] = 255
-    print(type(qr_path), qr_path)
     cv2.imwrite(qr_path, layer0)
 
 

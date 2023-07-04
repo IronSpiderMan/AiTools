@@ -71,8 +71,9 @@ def steganography():
         image_url = request.values.get('image_url')
         content = request.values.get('content')
         path = urlparse(image_url).path
-        image = cv2.imread("." + path)
+        image = cv2.imread("." + path, cv2.IMREAD_UNCHANGED)
         filename = os.path.basename(image_url)
+        filename = filename.replace(filename.split(".")[-1], 'png')
         ste_save_path = os.path.join(STEGANOGRAPHY_STE_PATH, filename)
         if not ste(image, content, ste_save_path):
             result = SteganographyResult('failed', '隐写失败', None)
@@ -90,7 +91,7 @@ def anti_steganography():
         # 获取上传的图片
         image_url = request.values.get('image_url')
         path = urlparse(image_url).path
-        image = cv2.imread("." + path)
+        image = cv2.imread("." + path, cv2.IMREAD_UNCHANGED)
         filename = os.path.basename(image_url)
         filename = filename.replace(filename.split(".")[-1], 'png')
         # 读取图片开始解隐写
