@@ -24,7 +24,9 @@ def steganography(image, content, save_path):
     :return: 如果成功，返回save_path，否则返回None
     """
     try:
-        h, w, _ = image.shape
+        h, w, c = image.shape
+        if c > 3:
+            image = image[:, :, :3]
         qr = qrcode.make(content)
         qr = np.array(qr, dtype=np.uint8)
         qr = cv2.resize(qr, (w, h))
