@@ -14,8 +14,8 @@ from utils import steganography as ste, anti_steganography as anti_ste
 
 app = Flask(__name__)
 
-# HOST = "http://39.100.68.34:8000"
-HOST = "http://127.0.0.1:8000"
+HOST = "http://39.100.68.34:8000"
+# HOST = "http://127.0.0.1:8000"
 STATIC_PATH = "./static"
 STATIC_URL = HOST + "/static"
 IMAGES_PATH = os.path.join(STATIC_PATH, 'images')
