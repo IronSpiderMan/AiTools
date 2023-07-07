@@ -4,8 +4,10 @@
     <title>图片上传示例</title>
 </head>
 <body>
+<img id="result" style="width: 500px;" src="/static/images/lbxx.png">
 <form id="uploadForm" enctype="multipart/form-data">
     <input type="file" id="fileInput" name="fileInput">
+    <input type="text" id="content" name="content">
     <input type="submit" value="上传">
 </form>
 <script type="text/javascript" src="/static/plugins/jquery.js"></script>
@@ -16,12 +18,14 @@
 
             var fileInput = $('#fileInput')[0];
             var file = fileInput.files[0]; // 获取用户选择的文件
-
+            var content = $("#content").val();
+            console.log(content)
             var formData = new FormData();
             formData.append('file', file); // 将文件添加到FormData对象
+            formData.append('content', content)
             $.ajax({
                 {#url: '39.100.68.34:5000',#}
-                url: '/api/upload_image',
+                url: '/api/hide_qr',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -37,6 +41,7 @@
                     return xhr;
                 },
                 success: function (response) {
+                    $("#result").attr("src", response.url);
                     console.log('上传成功');
                 },
                 error: function () {

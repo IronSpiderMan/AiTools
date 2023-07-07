@@ -1,6 +1,7 @@
 import os
 import cv2
 import torch
+import time
 from flask import Flask, request, render_template
 from gevent import pywsgi
 from urllib.parse import urlparse
@@ -8,7 +9,7 @@ from PIL import Image
 from torchvision import transforms
 from hubs.model import MattingNetwork
 from models.common import UploadResult, SegmentResult, DownloadResult, SteganographyResult
-from utils import namedtuple2json, center_crop
+from utils import namedtuple2json, center_crop, hide_qr as hqr, str2md5
 from utils import steganography as ste, anti_steganography as anti_ste
 
 app = Flask(__name__)
@@ -50,6 +51,24 @@ def upload_image():
         fpath = os.path.join(IMAGES_PATH, f.filename)
         f.save(fpath)
         result = UploadResult('success', '上传成功', IMAGES_URL + "/" + f.filename)
+        return namedtuple2json(result)
+
+
+@app.route('/api/hide_qr', methods=['GET', 'POST'])
+def hide_qr():
+    # 测试页面
+    if request.method == 'GET':
+        return render_template('upload_image.html')
+    elif request.method == 'POST':
+        f = request.files['file']
+        content = request.values.get('content')
+        filename = str2md5(str(time.time())) + ".jpg"
+        fpath = os.path.join(IMAGES_PATH, filename)
+        f.save(fpath)
+        origin = cv2.imread(fpath, 0)
+        qr_save_path = fpath.replace(".jpg", ".png")
+        hqr(origin, content, qr_save_path)
+        result = UploadResult('success', '隐藏成功', IMAGES_URL + "/" + filename.replace(".jpg", ".png"))
         return namedtuple2json(result)
 
 

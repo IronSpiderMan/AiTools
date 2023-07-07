@@ -15,6 +15,20 @@ headers = {
 }
 
 
+def hide_qr(o, content, output_path):
+    h, w, *_ = o.shape
+    q = qrcode.make(content)
+    q = np.array(q, dtype=np.uint8) * 255
+    q = cv2.resize(q, (w, h))
+    q = q // 2
+    o = o // 2 + 128
+    a = 255 - (o - q)
+    c = np.uint8(q / (a / 255 + 1e-3))
+    imgn = cv2.cvtColor(c, cv2.COLOR_GRAY2BGRA)
+    imgn[:, :, 3] = a
+    cv2.imwrite(output_path, imgn, [cv2.IMWRITE_JPEG_QUALITY, 100])
+
+
 def steganography(image, content, save_path):
     """
     图像隐写，把content生成二维码，写入image，保存到save_path
