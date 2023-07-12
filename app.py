@@ -9,13 +9,13 @@ from PIL import Image
 from torchvision import transforms
 from hubs.model import MattingNetwork
 from models.common import UploadResult, SegmentResult, DownloadResult, SteganographyResult
-from utils import namedtuple2json, center_crop, hide_qr as hqr, str2md5
+from utils import namedtuple2json, center_crop, hide_qr as hqr, str2md5, img2char as m2c
 from utils import steganography as ste, anti_steganography as anti_ste
 
 app = Flask(__name__)
 
-HOST = "http://39.100.68.34:8000"
-# HOST = "http://127.0.0.1:8000"
+# HOST = "http://39.100.68.34:8000"
+HOST = "http://127.0.0.1:8000"
 STATIC_PATH = "./static"
 STATIC_URL = HOST + "/static"
 IMAGES_PATH = os.path.join(STATIC_PATH, 'images')
@@ -69,6 +69,24 @@ def hide_qr():
         qr_save_path = fpath.replace(".jpg", ".png")
         hqr(origin, content, qr_save_path)
         result = UploadResult('success', '隐藏成功', IMAGES_URL + "/" + filename.replace(".jpg", ".png"))
+        return namedtuple2json(result)
+
+
+@app.route('/api/img2char', methods=['GET', 'POST'])
+def img2char():
+    # 测试页面
+    if request.method == 'GET':
+        return render_template('img2char.html')
+    elif request.method == 'POST':
+        f = request.files['file']
+        filename = str2md5(str(time.time())) + ".jpg"
+        fpath = os.path.join(IMAGES_PATH, filename)
+        f.save(fpath)
+        origin = cv2.imread(fpath, 0)
+        char_img = m2c(origin)
+        savepath = os.path.join(IMAGES_PATH, "char_" + filename)
+        cv2.imwrite(savepath, char_img)
+        result = UploadResult('success', '隐藏成功', IMAGES_URL + "/" + "char_" + filename)
         return namedtuple2json(result)
 
 
